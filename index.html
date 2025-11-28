@@ -1,1 +1,147 @@
+const express = require('express');
+const cors = require('cors');
+const axios = require('axios');
+const cheerio = require('cheerio');
 
+const app = express();
+app.use(cors()); // allow all origins (you can restrict for production)
+app.use(express.json());
+
+const PORT = process.env.PORT || 3000;
+
+/**
+ * Utility: try to clean a candidate URL to remove watermark hints.
+ * This is heuristic and not guaranteed.
+ */
+function tryRemoveWatermark(url) {
+  if (!url) return url;
+  try {
+    // many tiktok urls contain "playwm" (watermark) vs "play" (no watermark)
+    let u = url;
+    u = u.replace(/playwm/g, 'play'); // try swap
+    // remove common watermark query params
+    u = u.replace(/[?&]watermark=1/g, '');
+    return u;
+  } catch (e) {
+    return url;
+  }
+}
+
+/**
+ * Extract video URL from TikTok HTML page.
+ * Tries multiple strategies:
+ *  - look for <script id="SIGI_STATE"> JSON
+ *  - look for window['SIGI_STATE'] assignment
+ *  - fallback: regex for "playAddr" or "downloadAddr"
+ */
+function extractVideoUrlFromHtml(html) {
+  // 1) Try to find JSON inside <script id="SIGI_STATE">
+  const $ = cheerio.load(html);
+  const s1 = $('#SIGI_STATE').html();
+  if (s1) {
+    try {
+      const json = JSON.parse(s1);
+      // traverse to find video playAddr
+      const awemeList = json?.ItemModule || json?.ItemList || json;
+      // ItemModule case: keys are video ids
+      if (typeof awemeList === 'object') {
+        for (const k of Object.keys(awemeList)) {
+          const item = awemeList[k];
+          if (item && item.video) {
+            const play = item.video.playAddr || item.video.downloadAddr || item.video.originCover || null;
+            if (play) return play;
+          }
+        }
+      }
+    } catch (e) {
+      // ignore parse error
+    }
+  }
+
+  // 2) Try to find window['SIGI_STATE']=... JSON in page
+  const reWindow = /window\['SIGI_STATE'\]\s*=\s*({.+?});/s;
+  const mWin = html.match(reWindow);
+  if (mWin && mWin[1]) {
+    try {
+      const json = JSON.parse(mWin[1]);
+      const aweme = json?.ItemModule || json;
+      if (typeof aweme === 'object') {
+        for (const k of Object.keys(aweme)) {
+          const item = aweme[k];
+          if (item && item.video) {
+            const play = item.video.playAddr || item.video.downloadAddr || null;
+            if (play) return play;
+          }
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  // 3) Regex fallback: look for "playAddr":"https://...."
+  const rePlay = /"(?:playAddr|downloadAddr)"\s*:\s*"(https?:\\\\\/\\\\\/[^"]+)"/;
+  const mPlay = html.match(rePlay);
+  if (mPlay && mPlay[1]) {
+    // replace escaped slashes
+    return mPlay[1].replace(/\\\\\//g, '/');
+  }
+
+  // 4) Another fallback: search for unescaped playAddr
+  const rePlain = /"(?:playAddr|downloadAddr)"\s*:\s*"(https?:\/\/[^"]+)"/;
+  const mPlain = html.match(rePlain);
+  if (mPlain && mPlain[1]) return mPlain[1];
+
+  // 5) Last attempt: search for video urls in the HTML
+  const reAny = /(https?:\/\/v[^\s"'>]+?)(?=["'\s>])/g;
+  let found;
+  while ((found = reAny.exec(html)) !== null) {
+    const cand = found[1];
+    if (cand.includes('play') || cand.includes('video')) return cand;
+  }
+
+  return null;
+}
+
+// Endpoint: /api/download?url=<tiktok_url>
+app.get('/api/download', async (req, res) => {
+  const target = req.query.url;
+  if (!target) return res.status(400).json({ error: 'Missing url query param' });
+
+  try {
+    // Fetch the TikTok page — use mobile UA for best chance
+    const resp = await axios.get(target, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0 Mobile Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.9'
+      },
+      timeout: 15_000
+    });
+
+    const html = resp.data;
+    let videoUrl = extractVideoUrlFromHtml(html);
+
+    if (!videoUrl) {
+      return res.status(500).json({ error: 'Could not extract video URL from the TikTok page. Page structure may have changed.' });
+    }
+
+    // The extracted URL may contain escaped characters; normalize
+    videoUrl = videoUrl.replace(/\\\//g, '/');
+
+    // Try to return a non-watermarked variant (heuristic)
+    const tryNoWm = tryRemoveWatermark(videoUrl);
+
+    // Respond with JSON containing a downloadUrl (frontend will fetchAndSaveFile)
+    return res.json({ downloadUrl: tryNoWm || videoUrl });
+
+  } catch (err) {
+    console.error('Error fetching TikTok page:', err?.message || err);
+    // If TikTok blocked, reply with useful debug info
+    const msg = (err.response && err.response.status) ? `Upstream error: ${err.response.status}` : err.message || 'Network error';
+    return res.status(502).json({ error: 'Failed to fetch TikTok page. ' + msg });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`TikTok downloader API running on port ${PORT}`);
+});
