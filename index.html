@@ -1,147 +1,142 @@
-const express = require('express');
-const cors = require('cors');
-const axios = require('axios');
-const cheerio = require('cheerio');
+<!-- SIM Informer (BaLoch) -->
+<section id="sim-informer" style="font-family:Inter,system-ui,Arial; max-width:920px; margin:18px auto;">
+  <div style="background:linear-gradient(180deg,#071025,#0f1724); padding:18px; border-radius:12px; color:#e6eef6; box-shadow:0 6px 20px rgba(2,6,23,0.6); border:1px solid rgba(255,255,255,0.03);">
+    <!-- Header / Title -->
+    <div style="display:flex; align-items:center; gap:12px; justify-content:space-between; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <img id="sim-photo" src="https://i.postimg.cc/XZf3M6Sv/your-photo.jpg" alt="BaLoch" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid #06b6d4;box-shadow:0 4px 12px rgba(6,182,212,0.08)" />
+        <div>
+          <div style="font-weight:800;font-size:18px;line-height:1;">BaLoch TikTok Video Downloader</div>
+          <div style="color:#9aa4b2;font-size:13px;margin-top:4px;">❤✨⃝⃪Ubaidullah⏤͟͟͞͞★͙≛͙⃝͙BaLoch ❤ (♫ ✨⃝⃪)</div>
+        </div>
+      </div>
 
-const app = express();
-app.use(cors()); // allow all origins (you can restrict for production)
-app.use(express.json());
+      <div style="text-align:right;">
+        <div style="font-size:12px;color:#9aa4b2">Contact</div>
+        <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:6px;">
+          <a id="wa-link" href="https://wa.me/923048661181" target="_blank" style="background:#06b6d4;padding:9px 12px;border-radius:10px;color:#04202a;font-weight:700;text-decoration:none;display:inline-block">WhatsApp</a>
+        </div>
+      </div>
+    </div>
 
-const PORT = process.env.PORT || 3000;
+    <!-- SIM Cards -->
+    <div style="display:flex; gap:12px; margin-top:14px; flex-wrap:wrap;">
+      <!-- SIM A -->
+      <div class="sim-card" style="flex:1; min-width:180px; background:rgba(255,255,255,0.02); padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.03);">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:44px;height:44;border-radius:8px;background:linear-gradient(180deg,#0b1220,#071025);display:flex;align-items:center;justify-content:center;font-weight:800;color:#06b6d4">SIM 1</div>
+          <div>
+            <div style="font-size:13px;color:#9aa4b2">Primary</div>
+            <div id="sim1-number" style="font-weight:700;font-size:16px;margin-top:2px;">03048661181</div>
+            <div style="font-size:12px;color:#9aa4b2;margin-top:6px;">Tap actions below</div>
+          </div>
+        </div>
 
-/**
- * Utility: try to clean a candidate URL to remove watermark hints.
- * This is heuristic and not guaranteed.
- */
-function tryRemoveWatermark(url) {
-  if (!url) return url;
-  try {
-    // many tiktok urls contain "playwm" (watermark) vs "play" (no watermark)
-    let u = url;
-    u = u.replace(/playwm/g, 'play'); // try swap
-    // remove common watermark query params
-    u = u.replace(/[?&]watermark=1/g, '');
-    return u;
-  } catch (e) {
-    return url;
-  }
-}
+        <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+          <button class="btn-call" data-number="+923048661181" style="flex:1;padding:10px;border-radius:10px;border:none;background:#0ea5a4;color:#04202a;font-weight:700;cursor:pointer">Call</button>
+          <button class="btn-wa" data-number="+923048661181" style="flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.05);background:transparent;color:#e6eef6;font-weight:700;cursor:pointer">WhatsApp</button>
+          <button class="btn-copy" data-number="03048661181" style="padding:10px;border-radius:10px;border:1px dashed rgba(255,255,255,0.06);background:transparent;color:#9aa4b2;font-weight:700;cursor:pointer">Copy</button>
+        </div>
+      </div>
 
-/**
- * Extract video URL from TikTok HTML page.
- * Tries multiple strategies:
- *  - look for <script id="SIGI_STATE"> JSON
- *  - look for window['SIGI_STATE'] assignment
- *  - fallback: regex for "playAddr" or "downloadAddr"
- */
-function extractVideoUrlFromHtml(html) {
-  // 1) Try to find JSON inside <script id="SIGI_STATE">
-  const $ = cheerio.load(html);
-  const s1 = $('#SIGI_STATE').html();
-  if (s1) {
-    try {
-      const json = JSON.parse(s1);
-      // traverse to find video playAddr
-      const awemeList = json?.ItemModule || json?.ItemList || json;
-      // ItemModule case: keys are video ids
-      if (typeof awemeList === 'object') {
-        for (const k of Object.keys(awemeList)) {
-          const item = awemeList[k];
-          if (item && item.video) {
-            const play = item.video.playAddr || item.video.downloadAddr || item.video.originCover || null;
-            if (play) return play;
-          }
-        }
-      }
-    } catch (e) {
-      // ignore parse error
-    }
-  }
+      <!-- SIM B -->
+      <div class="sim-card" style="flex:1; min-width:180px; background:rgba(255,255,255,0.02); padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.03);">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:44px;height:44;border-radius:8px;background:linear-gradient(180deg,#0b1220,#071025);display:flex;align-items:center;justify-content:center;font-weight:800;color:#06b6d4">SIM 2</div>
+          <div>
+            <div style="font-size:13px;color:#9aa4b2">Secondary</div>
+            <div id="sim2-number" style="font-weight:700;font-size:16px;margin-top:2px;">03702866763</div>
+            <div style="font-size:12px;color:#9aa4b2;margin-top:6px;">Tap actions below</div>
+          </div>
+        </div>
 
-  // 2) Try to find window['SIGI_STATE']=... JSON in page
-  const reWindow = /window\['SIGI_STATE'\]\s*=\s*({.+?});/s;
-  const mWin = html.match(reWindow);
-  if (mWin && mWin[1]) {
-    try {
-      const json = JSON.parse(mWin[1]);
-      const aweme = json?.ItemModule || json;
-      if (typeof aweme === 'object') {
-        for (const k of Object.keys(aweme)) {
-          const item = aweme[k];
-          if (item && item.video) {
-            const play = item.video.playAddr || item.video.downloadAddr || null;
-            if (play) return play;
-          }
-        }
-      }
-    } catch (e) {
-      // ignore
-    }
-  }
+        <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+          <button class="btn-call" data-number="+923702866763" style="flex:1;padding:10px;border-radius:10px;border:none;background:#0ea5a4;color:#04202a;font-weight:700;cursor:pointer">Call</button>
+          <button class="btn-wa" data-number="+923702866763" style="flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.05);background:transparent;color:#e6eef6;font-weight:700;cursor:pointer">WhatsApp</button>
+          <button class="btn-copy" data-number="03702866763" style="padding:10px;border-radius:10px;border:1px dashed rgba(255,255,255,0.06);background:transparent;color:#9aa4b2;font-weight:700;cursor:pointer">Copy</button>
+        </div>
+      </div>
+    </div>
 
-  // 3) Regex fallback: look for "playAddr":"https://...."
-  const rePlay = /"(?:playAddr|downloadAddr)"\s*:\s*"(https?:\\\\\/\\\\\/[^"]+)"/;
-  const mPlay = html.match(rePlay);
-  if (mPlay && mPlay[1]) {
-    // replace escaped slashes
-    return mPlay[1].replace(/\\\\\//g, '/');
-  }
+    <!-- Extras: share / label -->
+    <div style="display:flex; gap:8px; margin-top:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;">
+      <div style="color:#9aa4b2;font-size:13px">Share this contact:</div>
+      <div style="display:flex; gap:8px;">
+        <button id="shareBtn" style="padding:8px 12px;border-radius:10px;border:none;background:#06b6d4;color:#04202a;font-weight:700;cursor:pointer">Share</button>
+        <button id="downloadVcf" style="padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:#e6eef6;font-weight:700;cursor:pointer">Download vCard</button>
+      </div>
+    </div>
 
-  // 4) Another fallback: search for unescaped playAddr
-  const rePlain = /"(?:playAddr|downloadAddr)"\s*:\s*"(https?:\/\/[^"]+)"/;
-  const mPlain = html.match(rePlain);
-  if (mPlain && mPlain[1]) return mPlain[1];
+    <div id="sim-msg" style="margin-top:12px;color:#9aa4b2;font-size:13px">Note: Browser cannot auto-read phone SIM — this shows the contact info you provided.</div>
+  </div>
+</section>
 
-  // 5) Last attempt: search for video urls in the HTML
-  const reAny = /(https?:\/\/v[^\s"'>]+?)(?=["'\s>])/g;
-  let found;
-  while ((found = reAny.exec(html)) !== null) {
-    const cand = found[1];
-    if (cand.includes('play') || cand.includes('video')) return cand;
-  }
-
-  return null;
-}
-
-// Endpoint: /api/download?url=<tiktok_url>
-app.get('/api/download', async (req, res) => {
-  const target = req.query.url;
-  if (!target) return res.status(400).json({ error: 'Missing url query param' });
-
-  try {
-    // Fetch the TikTok page — use mobile UA for best chance
-    const resp = await axios.get(target, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0 Mobile Safari/537.36',
-        'Accept-Language': 'en-US,en;q=0.9'
-      },
-      timeout: 15_000
+<script>
+  // Buttons: call / whatsapp / copy
+  document.querySelectorAll('#sim-informer .btn-call').forEach(btn=>{
+    btn.addEventListener('click', ()=> {
+      const num = btn.getAttribute('data-number');
+      // tel: link — on mobile will open dialer
+      window.location.href = 'tel:' + num;
     });
+  });
 
-    const html = resp.data;
-    let videoUrl = extractVideoUrlFromHtml(html);
+  document.querySelectorAll('#sim-informer .btn-wa').forEach(btn=>{
+    btn.addEventListener('click', ()=> {
+      const num = btn.getAttribute('data-number').replace(/\D/g,'');
+      // wa.me link
+      window.open('https://wa.me/' + num, '_blank');
+    });
+  });
 
-    if (!videoUrl) {
-      return res.status(500).json({ error: 'Could not extract video URL from the TikTok page. Page structure may have changed.' });
+  document.querySelectorAll('#sim-informer .btn-copy').forEach(btn=>{
+    btn.addEventListener('click', async ()=> {
+      const txt = btn.getAttribute('data-number');
+      try {
+        await navigator.clipboard.writeText(txt);
+        showMsg('Number copied: ' + txt);
+      } catch(e){
+        showMsg('Copy failed — long-press the number to copy.', true);
+      }
+    });
+  });
+
+  // Share API (mobile friendly)
+  document.getElementById('shareBtn').addEventListener('click', async ()=>{
+    const text = 'Contact — ❤✨⃝⃪Ubaidullah BaLoch ❤\nSIM1: 03048661181\nSIM2: 03702866763\nWhatsApp: https://wa.me/923048661181';
+    if(navigator.share){
+      navigator.share({ title: 'BaLoch Contact', text, url: window.location.href }).catch(()=>{});
+    } else {
+      // fallback: copy
+      try { await navigator.clipboard.writeText(text); showMsg('Contact copied to clipboard'); }
+      catch(e){ showMsg('Copy failed.'); }
     }
+  });
 
-    // The extracted URL may contain escaped characters; normalize
-    videoUrl = videoUrl.replace(/\\\//g, '/');
+  // Download vCard
+  document.getElementById('downloadVcf').addEventListener('click', ()=>{
+    const name = '❤✨⃝⃪Ubaidullah BaLoch ❤';
+    const tel1 = '+923048661181';
+    const tel2 = '+923702866763';
+    const vcard = `BEGIN:VCARD
+VERSION:3.0
+FN:${name}
+TEL;TYPE=CELL:${tel1}
+TEL;TYPE=CELL:${tel2}
+END:VCARD`;
+    const blob = new Blob([vcard], { type: 'text/vcard' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'BaLoch_Contact.vcf';
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
+  });
 
-    // Try to return a non-watermarked variant (heuristic)
-    const tryNoWm = tryRemoveWatermark(videoUrl);
-
-    // Respond with JSON containing a downloadUrl (frontend will fetchAndSaveFile)
-    return res.json({ downloadUrl: tryNoWm || videoUrl });
-
-  } catch (err) {
-    console.error('Error fetching TikTok page:', err?.message || err);
-    // If TikTok blocked, reply with useful debug info
-    const msg = (err.response && err.response.status) ? `Upstream error: ${err.response.status}` : err.message || 'Network error';
-    return res.status(502).json({ error: 'Failed to fetch TikTok page. ' + msg });
+  // small message utility
+  function showMsg(txt, isErr=false){
+    const el = document.getElementById('sim-msg');
+    el.textContent = txt;
+    el.style.color = isErr ? '#ff9aa2' : '#9aa4b2';
+    setTimeout(()=>{ el.textContent = 'Note: Browser cannot auto-read phone SIM — this shows the contact info you provided.'; el.style.color = '#9aa4b2'; }, 3000);
   }
-});
-
-app.listen(PORT, () => {
-  console.log(`TikTok downloader API running on port ${PORT}`);
-});
+</script>
