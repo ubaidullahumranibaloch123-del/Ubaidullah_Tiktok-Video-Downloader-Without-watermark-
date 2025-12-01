@@ -1,142 +1,209 @@
-<!-- SIM Informer (BaLoch) -->
-<section id="sim-informer" style="font-family:Inter,system-ui,Arial; max-width:920px; margin:18px auto;">
-  <div style="background:linear-gradient(180deg,#071025,#0f1724); padding:18px; border-radius:12px; color:#e6eef6; box-shadow:0 6px 20px rgba(2,6,23,0.6); border:1px solid rgba(255,255,255,0.03);">
-    <!-- Header / Title -->
-    <div style="display:flex; align-items:center; gap:12px; justify-content:space-between; flex-wrap:wrap;">
-      <div style="display:flex; align-items:center; gap:12px;">
-        <img id="sim-photo" src="https://i.postimg.cc/XZf3M6Sv/your-photo.jpg" alt="BaLoch" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid #06b6d4;box-shadow:0 4px 12px rgba(6,182,212,0.08)" />
-        <div>
-          <div style="font-weight:800;font-size:18px;line-height:1;">BaLoch TikTok Video Downloader</div>
-          <div style="color:#9aa4b2;font-size:13px;margin-top:4px;">❤✨⃝⃪Ubaidullah⏤͟͟͞͞★͙≛͙⃝͙BaLoch ❤ (♫ ✨⃝⃪)</div>
-        </div>
-      </div>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MoMin Photography — Prompt Studio</title>
+  <meta name="description" content="MoMin Photography - paste or write an image prompt, copy it and open Gemini to generate your professional image."/>
+  <style>
+    :root{
+      --bg:#0b1220; --panel:#0f1724; --accent:#06b6d4; --muted:#9aa4b2; --card:#081220; --white:#e6eef6;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
+    body{background:linear-gradient(180deg,#071025 0%, var(--bg) 100%); color:var(--white); display:flex; align-items:flex-start; justify-content:center; padding:20px;}
+    .wrap{width:100%; max-width:920px;}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:14px; padding:18px; box-shadow: 0 10px 30px rgba(2,6,23,0.6); border:1px solid rgba(255,255,255,0.03);}
+    header{display:flex; align-items:center; gap:14px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.02)}
+    .brand {
+      display:flex; align-items:center; gap:12px;
+    }
+    .logo {
+      width:56px; height:56px; border-radius:12px; overflow:hidden; flex:0 0 56px; display:inline-block; border:2px solid rgba(255,255,255,0.03);
+    }
+    .logo img{width:100%;height:100%;object-fit:cover;display:block}
+    h1{margin:0;font-size:18px;letter-spacing:0.3px}
+    .sub{margin:0;color:var(--muted); font-size:13px}
 
-      <div style="text-align:right;">
-        <div style="font-size:12px;color:#9aa4b2">Contact</div>
-        <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:6px;">
-          <a id="wa-link" href="https://wa.me/923048661181" target="_blank" style="background:#06b6d4;padding:9px 12px;border-radius:10px;color:#04202a;font-weight:700;text-decoration:none;display:inline-block">WhatsApp</a>
-        </div>
-      </div>
-    </div>
+    .hero{
+      display:flex; flex-direction:column; gap:12px; margin-top:14px;
+    }
 
-    <!-- SIM Cards -->
-    <div style="display:flex; gap:12px; margin-top:14px; flex-wrap:wrap;">
-      <!-- SIM A -->
-      <div class="sim-card" style="flex:1; min-width:180px; background:rgba(255,255,255,0.02); padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.03);">
-        <div style="display:flex; align-items:center; gap:10px;">
-          <div style="width:44px;height:44;border-radius:8px;background:linear-gradient(180deg,#0b1220,#071025);display:flex;align-items:center;justify-content:center;font-weight:800;color:#06b6d4">SIM 1</div>
+    .photo-wrap{
+      border-radius:12px; overflow:hidden; background:#05060a; display:flex; align-items:center; justify-content:center;
+      box-shadow: inset 0 -6px 20px rgba(0,0,0,0.5);
+      position:relative;
+    }
+    .photo{
+      width:100%; max-height:520px; object-fit:cover; display:block;
+      transition: transform 0.7s ease;
+    }
+    .photo-wrap:hover .photo{ transform: scale(1.02); }
+
+    .caption {
+      position:absolute; left:14px; bottom:14px; background:linear-gradient(90deg, rgba(0,0,0,0.45), rgba(0,0,0,0.25)); padding:8px 12px; border-radius:999px; display:flex; gap:10px; align-items:center;
+      backdrop-filter: blur(4px);
+    }
+    .caption .name { font-weight:700; color:var(--white); font-size:14px }
+    .caption .tag { color:var(--muted); font-size:12px; }
+
+    /* Prompt box */
+    .prompt-area{ margin-top:14px; display:flex; gap:12px; flex-direction:column; }
+    label{ font-size:13px; color:var(--muted); margin-bottom:6px; }
+    textarea{
+      width:100%; min-height:120px; resize:vertical; padding:14px; border-radius:12px; border:1px solid rgba(255,255,255,0.03); background:transparent; color:var(--white); font-size:15px;
+      outline:none;
+    }
+
+    .controls{ display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+    button{
+      border:none; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:700; color:#04202a; background:var(--accent);
+    }
+    .btn-ghost{ background:transparent; color:var(--white); border:1px solid rgba(255,255,255,0.06); font-weight:700; }
+    .btn-link{ background:transparent; color:var(--accent); border:1px dashed rgba(6,182,212,0.18); font-weight:700; }
+
+    .hint{ color:var(--muted); font-size:13px; margin-top:10px; }
+
+    /* small utilities */
+    .row{display:flex; gap:8px; align-items:center;}
+    .chip{padding:6px 10px;background:rgba(255,255,255,0.02);border-radius:999px;border:1px solid rgba(255,255,255,0.02); color:var(--muted); font-size:13px}
+    footer{ margin-top:14px; color:var(--muted); font-size:13px; text-align:center; }
+
+    /* Responsive */
+    @media (min-width:720px){
+      .hero { gap:18px; }
+      .photo{ max-height:640px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" role="main">
+      <header>
+        <div class="brand">
+          <div class="logo"><img id="logoImg" src="https://i.postimg.cc/XZf3M6Sv/your-photo.jpg" alt="MoMin Photography"/></div>
           <div>
-            <div style="font-size:13px;color:#9aa4b2">Primary</div>
-            <div id="sim1-number" style="font-weight:700;font-size:16px;margin-top:2px;">03048661181</div>
-            <div style="font-size:12px;color:#9aa4b2;margin-top:6px;">Tap actions below</div>
+            <h1>MoMin Photography</h1>
+            <div class="sub">Create & share prompts — generate images with Gemini</div>
+          </div>
+        </div>
+      </header>
+
+      <div class="hero">
+        <!-- Photo -->
+        <div class="photo-wrap">
+          <img id="mainPhoto" class="photo" src="https://i.postimg.cc/XZf3M6Sv/your-photo.jpg" alt="MoMin Photography — featured photo"/>
+          <div class="caption" aria-hidden="true">
+            <div class="name">MoMin Photography</div>
+            <div class="tag">Professional Portrait</div>
           </div>
         </div>
 
-        <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
-          <button class="btn-call" data-number="+923048661181" style="flex:1;padding:10px;border-radius:10px;border:none;background:#0ea5a4;color:#04202a;font-weight:700;cursor:pointer">Call</button>
-          <button class="btn-wa" data-number="+923048661181" style="flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.05);background:transparent;color:#e6eef6;font-weight:700;cursor:pointer">WhatsApp</button>
-          <button class="btn-copy" data-number="03048661181" style="padding:10px;border-radius:10px;border:1px dashed rgba(255,255,255,0.06);background:transparent;color:#9aa4b2;font-weight:700;cursor:pointer">Copy</button>
-        </div>
-      </div>
+        <!-- Prompt box -->
+        <div class="prompt-area">
+          <label for="prompt">Write your prompt (what you want Gemini to create)</label>
+          <textarea id="prompt" placeholder="e.g. Ultra-detailed portrait of a young man in traditional kurta, golden hour lighting, cinematic, 50mm, 8k, photorealistic..."></textarea>
 
-      <!-- SIM B -->
-      <div class="sim-card" style="flex:1; min-width:180px; background:rgba(255,255,255,0.02); padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.03);">
-        <div style="display:flex; align-items:center; gap:10px;">
-          <div style="width:44px;height:44;border-radius:8px;background:linear-gradient(180deg,#0b1220,#071025);display:flex;align-items:center;justify-content:center;font-weight:800;color:#06b6d4">SIM 2</div>
-          <div>
-            <div style="font-size:13px;color:#9aa4b2">Secondary</div>
-            <div id="sim2-number" style="font-weight:700;font-size:16px;margin-top:2px;">03702866763</div>
-            <div style="font-size:12px;color:#9aa4b2;margin-top:6px;">Tap actions below</div>
+          <div class="controls">
+            <button id="copyBtn">Copy Prompt</button>
+            <button id="downloadBtn" class="btn-ghost">Download .txt</button>
+            <button id="openGem" class="btn-link">Open Gemini (paste & generate)</button>
+            <button id="resetBtn" class="btn-ghost">Reset</button>
           </div>
+
+          <div class="row" style="margin-top:10px;">
+            <div class="chip">Tip: Write clear camera, lighting, mood & style terms</div>
+            <div style="flex:1"></div>
+            <div id="status" class="chip" style="border-radius:8px">Ready</div>
+          </div>
+
+          <div class="hint">Users can copy the prompt and paste it into Gemini (click Open Gemini). The image preview above is your professional sample photo.</div>
         </div>
 
-        <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
-          <button class="btn-call" data-number="+923702866763" style="flex:1;padding:10px;border-radius:10px;border:none;background:#0ea5a4;color:#04202a;font-weight:700;cursor:pointer">Call</button>
-          <button class="btn-wa" data-number="+923702866763" style="flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.05);background:transparent;color:#e6eef6;font-weight:700;cursor:pointer">WhatsApp</button>
-          <button class="btn-copy" data-number="03702866763" style="padding:10px;border-radius:10px;border:1px dashed rgba(255,255,255,0.06);background:transparent;color:#9aa4b2;font-weight:700;cursor:pointer">Copy</button>
-        </div>
+        <footer>
+          <div>© <strong>MoMin Photography</strong> — Use responsibly. Need the photo changed? Replace the <code>src</code> of the image tags with your own link.</div>
+        </footer>
       </div>
     </div>
-
-    <!-- Extras: share / label -->
-    <div style="display:flex; gap:8px; margin-top:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;">
-      <div style="color:#9aa4b2;font-size:13px">Share this contact:</div>
-      <div style="display:flex; gap:8px;">
-        <button id="shareBtn" style="padding:8px 12px;border-radius:10px;border:none;background:#06b6d4;color:#04202a;font-weight:700;cursor:pointer">Share</button>
-        <button id="downloadVcf" style="padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:#e6eef6;font-weight:700;cursor:pointer">Download vCard</button>
-      </div>
-    </div>
-
-    <div id="sim-msg" style="margin-top:12px;color:#9aa4b2;font-size:13px">Note: Browser cannot auto-read phone SIM — this shows the contact info you provided.</div>
   </div>
-</section>
 
-<script>
-  // Buttons: call / whatsapp / copy
-  document.querySelectorAll('#sim-informer .btn-call').forEach(btn=>{
-    btn.addEventListener('click', ()=> {
-      const num = btn.getAttribute('data-number');
-      // tel: link — on mobile will open dialer
-      window.location.href = 'tel:' + num;
-    });
-  });
+  <script>
+    // Elements
+    const promptEl = document.getElementById('prompt');
+    const copyBtn = document.getElementById('copyBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const openGem = document.getElementById('openGem');
+    const resetBtn = document.getElementById('resetBtn');
+    const status = document.getElementById('status');
 
-  document.querySelectorAll('#sim-informer .btn-wa').forEach(btn=>{
-    btn.addEventListener('click', ()=> {
-      const num = btn.getAttribute('data-number').replace(/\D/g,'');
-      // wa.me link
-      window.open('https://wa.me/' + num, '_blank');
-    });
-  });
+    // Pre-fill a helpful starter prompt (editable)
+    const starter = "Photorealistic portrait of a young man (South Asian) wearing a traditional kurta, golden-hour backlight, shallow depth of field (85mm), cinematic color grading, crisp skin texture, 4k, ultra-detailed, natural pose.";
+    promptEl.value = starter;
 
-  document.querySelectorAll('#sim-informer .btn-copy').forEach(btn=>{
-    btn.addEventListener('click', async ()=> {
-      const txt = btn.getAttribute('data-number');
+    // Copy to clipboard
+    copyBtn.addEventListener('click', async () => {
       try {
-        await navigator.clipboard.writeText(txt);
-        showMsg('Number copied: ' + txt);
-      } catch(e){
-        showMsg('Copy failed — long-press the number to copy.', true);
+        await navigator.clipboard.writeText(promptEl.value);
+        showStatus('Prompt copied to clipboard ✓');
+      } catch (e) {
+        showStatus('Copy failed — long-press to select & copy', true);
       }
     });
-  });
 
-  // Share API (mobile friendly)
-  document.getElementById('shareBtn').addEventListener('click', async ()=>{
-    const text = 'Contact — ❤✨⃝⃪Ubaidullah BaLoch ❤\nSIM1: 03048661181\nSIM2: 03702866763\nWhatsApp: https://wa.me/923048661181';
-    if(navigator.share){
-      navigator.share({ title: 'BaLoch Contact', text, url: window.location.href }).catch(()=>{});
-    } else {
-      // fallback: copy
-      try { await navigator.clipboard.writeText(text); showMsg('Contact copied to clipboard'); }
-      catch(e){ showMsg('Copy failed.'); }
+    // Download prompt as .txt
+    downloadBtn.addEventListener('click', () => {
+      const blob = new Blob([promptEl.value], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'momin-prompt.txt';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      showStatus('Prompt downloaded ✓');
+    });
+
+    // Open Gemini (guide user)
+    openGem.addEventListener('click', () => {
+      // Open Gemini site in new tab — user should paste prompt manually
+      window.open('https://gemini.google.com/', '_blank', 'noopener');
+      showStatus('Gemini opened — paste the prompt and generate');
+    });
+
+    // Reset
+    resetBtn.addEventListener('click', () => {
+      promptEl.value = starter;
+      showStatus('Reset to starter prompt');
+    });
+
+    // Show status
+    let statusTimer = null;
+    function showStatus(msg, isErr=false){
+      status.textContent = msg;
+      status.style.color = isErr ? '#ff9aa2' : '#06b6d4';
+      clearTimeout(statusTimer);
+      statusTimer = setTimeout(()=> {
+        status.textContent = 'Ready';
+        status.style.color = '';
+      }, 3000);
     }
-  });
 
-  // Download vCard
-  document.getElementById('downloadVcf').addEventListener('click', ()=>{
-    const name = '❤✨⃝⃪Ubaidullah BaLoch ❤';
-    const tel1 = '+923048661181';
-    const tel2 = '+923702866763';
-    const vcard = `BEGIN:VCARD
-VERSION:3.0
-FN:${name}
-TEL;TYPE=CELL:${tel1}
-TEL;TYPE=CELL:${tel2}
-END:VCARD`;
-    const blob = new Blob([vcard], { type: 'text/vcard' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'BaLoch_Contact.vcf';
-    a.click();
-    setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
-  });
+    // Accessibility: allow keyboard shortcut Ctrl/Cmd+Enter to open Gemini
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        openGem.click();
+      }
+    });
 
-  // small message utility
-  function showMsg(txt, isErr=false){
-    const el = document.getElementById('sim-msg');
-    el.textContent = txt;
-    el.style.color = isErr ? '#ff9aa2' : '#9aa4b2';
-    setTimeout(()=>{ el.textContent = 'Note: Browser cannot auto-read phone SIM — this shows the contact info you provided.'; el.style.color = '#9aa4b2'; }, 3000);
-  }
-</script>
+    // If user wants to replace photo quickly by URL prompt
+    // (Optional helper: long-press logo to change image)
+    document.getElementById('logoImg').addEventListener('contextmenu', (ev)=>{
+      ev.preventDefault();
+      const url = prompt('Paste image URL to replace profile photo (must be direct image link ending .jpg/.png):');
+      if(url){
+        document.getElementById('logoImg').src = url;
+        document.getElementById('mainPhoto').src = url;
+        showStatus('Photo replaced');
+      }
+    });
+  </script>
+</body>
+</html>
